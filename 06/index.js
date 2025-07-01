@@ -4,6 +4,8 @@ const express = require("express");
 // Cria uma instância do aplicativo Express
 const app = express();
 
+app.use(express.json()); // Permite que o Express entenda JSON 
+
 // Vetor de pessoas com código, nome, idade e cidade
 let pessoas = [
   { "codigo": 1, "nome": "Ana Souza", "idade": 28, "cidade": "São Paulo" },
@@ -17,7 +19,7 @@ let pessoas = [
   { "codigo": 9, "nome": "Isabela Ferreira", "idade": 25, "cidade": "Salvador" },
   { "codigo": 10, "nome": "João Pedro Ramos", "idade": 33, "cidade": "Natal" }
 ];
-
+let indiceCadastro = 11
 
 // Define uma rota GET para o caminho raiz ("/") 
 app.get('/', (req, res) => {
@@ -40,6 +42,33 @@ app.get('/:codigo', (req, res) => {
   }else{
     res.status(404).json({mensagem:'Pessoa não encontrada.'});
   }
+});
+// Rota para cadastrar pessoas   
+app.post('/', (req, res) => {
+  // Extrair as características do objeto
+  const { nome, idade, cidade } = req.body;
+
+  // Caso o nome, idade ou cidade não sejam informados, retorna um status 400
+  if (!nome || !idade || !cidade) {
+    return res.status(400).json({ mensagem: "Nome, idade e cidade são obrigatórios." });
+  }
+
+  // Criar nova pessoa
+  const novaPessoa = {
+    codigo: indiceCadastro,
+    nome,
+    idade,
+    cidade
+  };
+
+  // Incrementar variável indiceCadastro
+  indiceCadastro++;
+
+  // Adicionar ao vetor
+  pessoas.push(novaPessoa);
+
+  // Retornar a nova pessoa
+  res.status(201).json(novaPessoa);
 });
 // Executa o projeto na porta especificada 
 app.listen(8080, () => {
