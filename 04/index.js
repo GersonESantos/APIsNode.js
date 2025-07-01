@@ -19,21 +19,28 @@ let pessoas = [
 ];
 
 
-// Define uma rota GET para o caminho raiz ("/") 
-app.get('/', (req, res) => {
+// // Define uma rota GET para o caminho raiz ("/") 
+// app.get('/', (req, res) => {
     
-    res.json(pessoas);
+//     res.json(pessoas);
         
-});
+// });
 
-// Rota para exibir uma pessoa específica através do código
+// // Rota para exibir uma pessoa específica através do código
 app.get('/:codigo', (req, res) => {
   // Obter o código
   const codigo = parseInt(req.params.codigo);
 
-  res.send(codigo);
-});
+  // Localizar o objeto
+  const pessoa = pessoas.find(obj => obj.codigo == codigo);
 
+  // Exibir pessoa
+  if(pessoa){
+    res.json(pessoa);
+  }else{
+    res.json({mensagem:'Pessoa não encontrada.'});
+  }
+});
 // Executa o projeto na porta especificada 
 app.listen(8080, () => {
     console.log('Servidor rodando em http://localhost:8080');
