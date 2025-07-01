@@ -26,6 +26,14 @@ app.get('/', (req, res) => {
         
 });
 
+// Rota para exibir uma pessoa específica através do código
+app.get('/:codigo', (req, res) => {
+  // Obter o código
+  const codigo = parseInt(req.params.codigo);
+
+  res.send(codigo);
+});
+
 // Executa o projeto na porta especificada 
 app.listen(8080, () => {
     console.log('Servidor rodando em http://localhost:8080');
