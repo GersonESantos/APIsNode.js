@@ -70,6 +70,40 @@ app.post('/', (req, res) => {
   // Retornar a nova pessoa
   res.status(201).json(novaPessoa);
 });
+
+// Rota para atualizar todas as informações de uma pessoa
+app.put('/:codigo', (req, res) => {
+  // Extrair o código enviado via parâmetro
+  const codigo = parseInt(req.params.codigo);
+
+  // Localizar o indice da pessoa com o código recebido via parâmetro
+  const indicePessoa = pessoas.findIndex(p => p.codigo === codigo);
+
+  // Caso não encontrar a pessoa
+  if (indicePessoa == -1) {
+    return res.status(404).json({ mensagem: 'Pessoa não encontrada.' });
+  }
+
+  // Extrair as características do objeto enviado
+  const { nome, idade, cidade } = req.body;
+
+  // Caso o nome, idade ou cidade não sejam informados, retorna um status 400
+  if (!nome || !idade || !cidade) {
+    return res.status(400).json({ mensagem: 'Nome, idade e cidade são obrigatórios para PUT.' });
+  }
+
+  // Criar nova pessoa
+  pessoas[indicePessoa] = {
+    codigo,
+    nome,
+    idade,
+    cidade
+  };
+
+  // Retorna a pessoa com todas as características atualizadas
+  res.status(200).json(pessoas[indicePessoa]);
+});
+
 // Executa o projeto na porta especificada 
 app.listen(8080, () => {
     console.log('Servidor rodando em http://localhost:8080');
