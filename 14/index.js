@@ -1,4 +1,5 @@
 // Importa o módulo Express para usar suas funcionalidades 
+require('dotenv').config(); // Carrega as variáveis do .env
 const express = require("express");
 const path = require("path");
 
@@ -7,7 +8,6 @@ const cors = require('cors');
 
 // Importando a função `conectarMongo` do arquivo `conexao/mongo.js`
 const { conectarMongo } = require('./conexao/mongo');
-
 
 const app = express();
 
