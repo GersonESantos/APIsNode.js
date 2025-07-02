@@ -104,6 +104,31 @@ app.put('/:codigo', (req, res) => {
   res.status(200).json(pessoas[indicePessoa]);
 });
 
+// Rota para atualizar pacialmente as informações de uma pessoa
+app.patch('/:codigo', (req, res) => {
+  // Extrair o código enviado via parâmetro
+  const codigo = parseInt(req.params.codigo);
+
+  // Localizar a pessoa através do código
+  const pessoa = pessoas.find(p => p.codigo === codigo);
+
+  // Caso não encontrar a pessoa
+  if (!pessoa) {
+    return res.status(404).json({ mensagem: 'Pessoa não encontrada.' });
+  }
+
+  // Extrair as características do objeto enviado
+  const { nome, idade, cidade } = req.body;
+
+  // As características que não forem informadas, manteremos as atuais
+  if (nome !== undefined)   pessoa.nome = nome;
+  if (idade !== undefined)  pessoa.idade = idade;
+  if (cidade !== undefined) pessoa.cidade = cidade;
+
+  // Retorna um objeto do tipo pessoa
+  res.status(200).json(pessoa);
+});
+
 // Executa o projeto na porta especificada 
 app.listen(8080, () => {
     console.log('Servidor rodando em http://localhost:8080');
