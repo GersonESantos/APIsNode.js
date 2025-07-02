@@ -29,7 +29,7 @@ app.use('/pessoaMongo', pessoaMongoRouter);
 // Chamar a função `conectarMongo()` para estabelecer a conexão
 conectarMongo().then(() => {
   // Após a conexão com o MongoDB ser bem-sucedida, o servidor Express é iniciado
-  app.listen(5500, () => console.log('Servidor rodando na porta 8080 e conectado ao MongoDB'));
+  app.listen(5500, () => console.log('Servidor rodando na porta 5050 e conectado ao MongoDB'));
   
 }).catch(err => {
   // Caso ocorra algum erro, ele será exibido no console e a aplicação não será iniciada.

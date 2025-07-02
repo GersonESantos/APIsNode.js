@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalEditar = document.getElementById('modal-editar');
     const formEditar = document.getElementById('form-editar');
     const closeModalButton = document.querySelector('.close-button');
-    const codigoEditInput = document.getElementById('codigo-edit');
+    const idEditInput = document.getElementById('id-edit');
     const nomeEditInput = document.getElementById('nome-edit');
     const idadeEditInput = document.getElementById('idade-edit');
     const cidadeEditInput = document.getElementById('cidade-edit');
@@ -39,13 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
         pessoas.forEach(pessoa => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${pessoa.codigo}</td>
+                <td>${pessoa._id}</td>
                 <td>${pessoa.nome}</td>
                 <td>${pessoa.idade}</td>
                 <td>${pessoa.cidade}</td>
                 <td class="action-buttons">
-                    <button class="edit-btn" data-codigo="${pessoa.codigo}">Editar</button>
-                    <button class="delete-btn" data-codigo="${pessoa.codigo}">Excluir</button>
+                    <button class="edit-btn" data-id="${pessoa._id}">Editar</button>
+                    <button class="delete-btn" data-id="${pessoa._id}">Excluir</button>
                 </td>
             `;
             tabelaPessoasBody.appendChild(tr);
@@ -87,13 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
  
         // Botão de Excluir
         if (target.classList.contains('delete-btn')) {
-            const codigo = target.dataset.codigo;
-            if (confirm(`Tem certeza que deseja excluir a pessoa com código ${codigo}?`)) {
+            const id = target.dataset.id;
+            if (confirm(`Tem certeza que deseja excluir a pessoa com ID ${id}?`)) {
                 try {
-                    const response = await fetch(`${apiUrl}/${codigo}`, {
+                    const response = await fetch(`${apiUrl}/${id}`, {
                         method: 'DELETE',
                     });
-                    if (!response.ok) {
+                    if (response.status !== 204) { // DELETE bem-sucedido retorna 204
                         throw new Error('Erro ao excluir pessoa');
                     }
                     fetchAndRenderPessoas(); // Atualiza a tabela
@@ -106,14 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
  
         // Botão de Editar
         if (target.classList.contains('edit-btn')) {
-            const codigo = target.dataset.codigo;
+            const id = target.dataset.id;
             try {
-                const response = await fetch(`${apiUrl}/${codigo}`);
+                const response = await fetch(`${apiUrl}/${id}`);
                 if (!response.ok) throw new Error('Pessoa não encontrada');
                 const pessoa = await response.json();
                 
                 // Preenche o modal com os dados da pessoa
-                codigoEditInput.value = pessoa.codigo;
+                idEditInput.value = pessoa._id;
                 nomeEditInput.value = pessoa.nome;
                 idadeEditInput.value = pessoa.idade;
                 cidadeEditInput.value = pessoa.cidade;
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener para o formulário de edição
     formEditar.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const codigo = codigoEditInput.value;
+        const id = idEditInput.value;
         const pessoaAtualizada = {
             nome: nomeEditInput.value,
             idade: parseInt(idadeEditInput.value, 10),
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
  
         try {
-            const response = await fetch(`${apiUrl}/${codigo}`, {
+            const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(pessoaAtualizada),

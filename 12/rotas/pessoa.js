@@ -1,157 +1,77 @@
-// Importar o Express
 const express = require('express');
+const router = express.Router();
+const { getPessoasCollection } = require('../conexao/mongo');
+const { ObjectId } = require('mongodb'); // Essencial para buscar por ID
 
-// Criar o objeto router, responsável por gerenciar nossas rotas
-const router = express.Router(); 
+// Função auxiliar para simplificar o tratamento de erros em rotas assíncronas
+const asyncHandler = fn => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
 
-// VETOR, ÍNDICE PARA CADASTRO E ROTAS
-// Vetor de pessoas com código, nome, idade e cidade
-let pessoas = [
-  { "codigo": 1, "nome": "Ana Souza", "idade": 28, "cidade": "São Paulo" },
-  { "codigo": 2, "nome": "Bruno Oliveira", "idade": 34, "cidade": "Rio de Janeiro" },
-  { "codigo": 3, "nome": "Carla Mendes", "idade": 22, "cidade": "Belo Horizonte" },
-  { "codigo": 4, "nome": "Diego Lima", "idade": 40, "cidade": "Curitiba" },
-  { "codigo": 5, "nome": "Eduarda Costa", "idade": 30, "cidade": "Porto Alegre" },
-  { "codigo": 6, "nome": "Felipe Rocha", "idade": 26, "cidade": "Brasília" },
-  { "codigo": 7, "nome": "Gabriela Martins", "idade": 31, "cidade": "Recife" },
-  { "codigo": 8, "nome": "Henrique Silva", "idade": 29, "cidade": "Fortaleza" },
-  { "codigo": 9, "nome": "Isabela Ferreira", "idade": 25, "cidade": "Salvador" },
-  { "codigo": 10, "nome": "João Pedro Ramos", "idade": 33, "cidade": "Natal" }
-];
-let indiceCadastro = 11
+// ROTA GET /api/ - Listar todas as pessoas
+router.get('/', asyncHandler(async (req, res) => {
+    const collection = getPessoasCollection();
+    const pessoas = await collection.find({}).toArray();
+    res.json(pessoas);
+}));
 
-// Define uma rota GET para o caminho raiz ("/") 
-router.get('/', (req, res) => {
+// ROTA GET /api/:id - Buscar uma pessoa pelo ID
+router.get('/:id', asyncHandler(async (req, res) => {
+    const collection = getPessoasCollection();
+    if (!ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ msg: 'O ID fornecido é inválido.' });
+    }
+    const pessoa = await collection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!pessoa) {
+        return res.status(404).json({ msg: 'Pessoa não encontrada.' });
+    }
+    res.json(pessoa);
+}));
+
+// ROTA POST /api/ - Cadastrar uma nova pessoa
+router.post('/', asyncHandler(async (req, res) => {
+    const { nome, idade, cidade } = req.body;
+    if (!nome || !idade || !cidade) {
+        return res.status(400).json({ msg: 'Dados incompletos. Forneça nome, idade e cidade.' });
+    }
+    const collection = getPessoasCollection();
+    const novaPessoa = { nome, idade: parseInt(idade, 10), cidade };
+    const result = await collection.insertOne(novaPessoa);
     
-    res.status(200).json(pessoas);
-        
-});
+    // Retorna o documento recém-criado com o _id gerado pelo MongoDB
+    const documentoInserido = { _id: result.insertedId, ...novaPessoa };
+    res.status(201).json(documentoInserido);
+}));
 
-// Rota para exibir uma pessoa específica através do código
-router.get('/:codigo', (req, res) => {
-  // Obter o código
-  const codigo = parseInt(req.params.codigo);
+// ROTA PUT /api/:id - Atualizar uma pessoa
+router.put('/:id', asyncHandler(async (req, res) => {
+    const { nome, idade, cidade } = req.body;
+    if (!ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ msg: 'O ID fornecido é inválido.' });
+    }
+    const collection = getPessoasCollection();
+    const pessoaAtualizada = { nome, idade: parseInt(idade, 10), cidade };
+    const result = await collection.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        { $set: pessoaAtualizada }
+    );
+    if (result.matchedCount === 0) {
+        return res.status(404).json({ msg: 'Pessoa não encontrada para atualizar.' });
+    }
+    res.json({ msg: 'Pessoa atualizada com sucesso.' });
+}));
 
-  // Localizar o objeto
-  const pessoa = pessoas.find(obj => obj.codigo == codigo);
+// ROTA DELETE /api/:id - Excluir uma pessoa
+router.delete('/:id', asyncHandler(async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ msg: 'O ID fornecido é inválido.' });
+    }
+    const collection = getPessoasCollection();
+    const result = await collection.deleteOne({ _id: new ObjectId(req.params.id) });
+    if (result.deletedCount === 0) {
+        return res.status(404).json({ msg: 'Pessoa não encontrada para excluir.' });
+    }
+    res.status(204).send(); // 204 No Content é uma boa resposta para um DELETE bem-sucedido
+}));
 
-  // Exibir pessoa
-  if(pessoa){
-    res.status(200).json(pessoa);
-  }else{
-    res.status(404).json({mensagem:'Pessoa não encontrada.'});
-  }
-});
-// Rota para cadastrar pessoas   
-router.post('/', (req, res) => {
-  // Extrair as características do objeto
-  const { nome, idade, cidade } = req.body;
-
-  // Caso o nome, idade ou cidade não sejam informados, retorna um status 400
-  if (!nome || !idade || !cidade) {
-    return res.status(400).json({ mensagem: "Nome, idade e cidade são obrigatórios." });
-  }
-
-  // Criar nova pessoa
-  const novaPessoa = {
-    codigo: indiceCadastro,
-    nome,
-    idade,
-    cidade
-  };
-
-  // Incrementar variável indiceCadastro
-  indiceCadastro++;
-
-  // Adicionar ao vetor
-  pessoas.push(novaPessoa);
-
-  // Retornar a nova pessoa
-  res.status(201).json(novaPessoa);
-});
-
-// Rota para atualizar todas as informações de uma pessoa
-router.put('/:codigo', (req, res) => {
-  // Extrair o código enviado via parâmetro
-  const codigo = parseInt(req.params.codigo);
-
-  // Localizar o indice da pessoa com o código recebido via parâmetro
-  const indicePessoa = pessoas.findIndex(p => p.codigo === codigo);
-
-  // Caso não encontrar a pessoa
-  if (indicePessoa == -1) {
-    return res.status(404).json({ mensagem: 'Pessoa não encontrada.' });
-  }
-
-  // Extrair as características do objeto enviado
-  const { nome, idade, cidade } = req.body;
-
-  // Caso o nome, idade ou cidade não sejam informados, retorna um status 400
-  if (!nome || !idade || !cidade) {
-    return res.status(400).json({ mensagem: 'Nome, idade e cidade são obrigatórios para PUT.' });
-  }
-
-  // Criar nova pessoa
-  pessoas[indicePessoa] = {
-    codigo,
-    nome,
-    idade,
-    cidade
-  };
-
-  // Retorna a pessoa com todas as características atualizadas
-  res.status(200).json(pessoas[indicePessoa]);
-});
-
-// Rota para atualizar pacialmente as informações de uma pessoa
-router.patch('/:codigo', (req, res) => {
-  // Extrair o código enviado via parâmetro
-  const codigo = parseInt(req.params.codigo);
-
-  // Localizar a pessoa através do código
-  const pessoa = pessoas.find(p => p.codigo === codigo);
-
-  // Caso não encontrar a pessoa
-  if (!pessoa) {
-    return res.status(404).json({ mensagem: 'Pessoa não encontrada.' });
-  }
-
-  // Extrair as características do objeto enviado
-  const { nome, idade, cidade } = req.body;
-
-  // As características que não forem informadas, manteremos as atuais
-  if (nome !== undefined)   pessoa.nome = nome;
-  if (idade !== undefined)  pessoa.idade = idade;
-  if (cidade !== undefined) pessoa.cidade = cidade;
-
-  // Retorna um objeto do tipo pessoa
-  res.status(200).json(pessoa);
-});
-
-
- // - Remover pessoa pelo código
-router.delete('/:codigo', (req, res) => {
-  // Extrair o código enviado via parâmetro
-  const codigo = parseInt(req.params.codigo);
-
-  // Localizar o indice da pessoa com o código recebido via parâmetro
-  const indicePessoa = pessoas.findIndex(p => p.codigo === codigo);
-
-  // Caso não encontrar a pessoa
-  if (indicePessoa == -1) {
-    return res.status(404).json({ mensagem: 'Pessoa não encontrada.' });
-  }
-
-  // Remover pessoa
-  pessoas.splice(indicePessoa, 1);
-
-  // Retornar mensagem, informando que a pessoa foi removida
-  res.status(200).json({ mensagem: 'Pessoa removida com sucesso.'});
-});
-
-// Exportar rotas
 module.exports = router;
-
-
-
-
