@@ -1,62 +1,47 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Pessoas</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerenciamento de Pessoas</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="container">
+    <h1>Gerenciar Pessoas</h1>
 
-    <h1>Gerenciador de Pessoas</h1>
+    <form id="pessoaForm">
+      <input type="hidden" id="id" />
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" required />
 
-    <div class="container">
-        <h2>Cadastrar Nova Pessoa</h2>
-        <form id="form-adicionar">
-            <input type="text" id="nome-add" placeholder="Nome" required>
-            <input type="number" id="idade-add" placeholder="Idade" required>
-            <input type="text" id="cidade-add" placeholder="Cidade" required>
-            <button type="submit">Cadastrar</button>
-        </form>
+      <label for="idade">Idade:</label>
+      <input type="number" id="idade" required />
+
+      <label for="cidade">Cidade:</label>
+      <input type="text" id="cidade" required />
+
+      <button type="submit">Salvar</button>
+    </form>
+
+    <button id="listarBtn" class="btn-listar">Listar Pessoas</button>
+
+    <div id="listaContainer">
+      <table id="tabelaPessoas">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Cidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="container">
-        <h2>Lista de Pessoas</h2>
-        <table id="tabela-pessoas">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nome</th>
-                    <th>Idade</th>
-                    <th>Cidade</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Linhas da tabela serão inseridas aqui via JavaScript -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Modal para Edição -->
-    <div id="modal-editar" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Editar Pessoa</h2>
-            <form id="form-editar">
-                <input type="hidden" id="codigo-edit">
-                <label for="nome-edit">Nome:</label>
-                <input type="text" id="nome-edit" required>
-                <label for="idade-edit">Idade:</label>
-                <input type="number" id="idade-edit" required>
-                <label for="cidade-edit">Cidade:</label>
-                <input type="text" id="cidade-edit" required>
-                <button type="submit">Salvar Alterações</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
-
