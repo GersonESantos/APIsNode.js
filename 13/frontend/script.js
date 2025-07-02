@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5500/pessoaMongo';
+const API_URL = 'https://front-pessoa-et5n.onrender.com/';
 
 // Carrega as pessoas automaticamente ao iniciar
 document.addEventListener('DOMContentLoaded', () => {
