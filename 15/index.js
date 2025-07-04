@@ -1,3 +1,6 @@
+// Carrega as variáveis de ambiente do arquivo .env
+require('dotenv').config();
+
 // Importa o módulo Express para usar suas funcionalidades 
 const express = require("express");
 const path = require("path");
@@ -25,12 +28,14 @@ app.use('/pessoa', pessoaRouter);
 app.use('/pessoaMongo', pessoaMongoRouter);
 
 
+// Define a porta a partir do .env ou usa 5500 como padrão
+const PORT = process.env.PORT || 5500;
+
 // Executa o projeto na porta especificada 
 // Chamar a função `conectarMongo()` para estabelecer a conexão
 conectarMongo().then(() => {
   // Após a conexão com o MongoDB ser bem-sucedida, o servidor Express é iniciado
-  app.listen(5500, () => console.log('Servidor rodando na porta 5050 e conectado ao MongoDB'));
-  
+  app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT} e conectado ao MongoDB`));
 }).catch(err => {
   // Caso ocorra algum erro, ele será exibido no console e a aplicação não será iniciada.
   console.error('Erro ao conectar ao MongoDB ou iniciar o servidor:', err);

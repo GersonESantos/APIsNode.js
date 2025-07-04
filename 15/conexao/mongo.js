@@ -1,8 +1,13 @@
 // Importando a classe MongoClient do pacote 'mongodb'.
 const { MongoClient } = require('mongodb');
 
-// Conexão com o MongoDB, usando o MongoDB Atlas (nuvem).
-const uri = 'mongodb+srv://gebhsantos:YPYS8bRSD7NPbRKp@cluster0.kblbkig.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+// A URI de conexão é lida da variável de ambiente.
+const uri = process.env.MONGO_URI;
+
+// Valida se a URI do MongoDB foi carregada ANTES de tentar criar o client.
+if (!uri) {
+  throw new Error('A variável de ambiente MONGO_URI não está definida. Verifique se o arquivo .env existe e se o pacote dotenv está instalado e configurado corretamente.');
+}
 
 // Criando uma instância do MongoClient, que será usada para estabelecer a conexão com o banco de dados.
 const client = new MongoClient(uri);
