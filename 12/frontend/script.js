@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const apiUrl = '/api'; // A API será servida no mesmo host
+    const apiUrl = '/produto'; // A API será servida no mesmo host
  
     const formAdicionar = document.getElementById('form-adicionar');
     const tabelaPessoasBody = document.querySelector('#tabela-pessoas tbody');
